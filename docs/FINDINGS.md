@@ -66,6 +66,41 @@ ordinary right-click-and-hold. Restricting to the side-button keycodes
 them. A stuck-key detector must scope to the affected interface; raw "key
 held too long" is dominated by legitimate mouse-button holds.
 
+## Recovery-method evaluation (2026-06-12) — the USB-reset approach is compromised
+
+Live testing on the device produced three hard results that redirect the fix:
+
+1. **No passive hold-vs-freeze discriminator exists.** During a genuine
+   6.7s hold, the keyboard interface emitted exactly two raw HID reports —
+   the press and, 6.7s later, the release — with total silence between.
+   The Scimitar sends no HID idle resends, so a genuine hold and a freeze
+   are byte-identical at *both* the evdev and raw-HID layers. The only
+   difference is that a hold eventually releases and a freeze never does.
+   ⇒ detection can only be a timeout.
+
+2. **`USBDEVFS_RESET` (bus-reset) does not clear a stuck key.** It is fast
+   (~0.5s) and safe, but the kernel keeps the input device bound across it
+   (no `input_unregister`), so a logically-held key stays held — the
+   keyboard-lock symptom would persist even after the reset.
+
+3. **`reauthorize` / `rebind` clear the key but can wedge the device.**
+   They *do* tear the input devices down (udev shows the full remove set —
+   `input_unregister` releases held keys), but in testing this left the
+   device in a state that only a **physical replug** recovered. As
+   automatic recovery they are unsafe: they can turn a recoverable freeze
+   into a hard lockup. (Consistent with buggy firmware that mishandles USB
+   re-configuration.)
+
+**Conclusion:** no USB-reset method is both safe *and* effective — the safe
+one doesn't fix the stuck key, the effective ones can brick until replug.
+The stuck-key symptom (the disruptive one — a locked modifier) should
+instead be fixed by the **HID-BPF quirk injecting the missing release
+report directly on the device** (`hid_bpf_input_report`): it clears the key
+at the HID layer instantly, never touches USB configuration, and cannot
+wedge the device. The residual "buttons dead until replug" is not solvable
+in software, but it is the benign half of the failure. Auto-reset is left
+disabled (observe mode) pending the BPF quirk.
+
 ## Firmware-side root cause
 
 Static RE of the firmware image (`docs/FIRMWARE_RE.md`) narrowed the freeze
