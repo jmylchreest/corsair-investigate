@@ -89,8 +89,12 @@ But the machinery for the fix is mature:
 2. Is the trigger correlated with simultaneous keyboard + side-button
    activity (cross-device, possibly same keycode)? Per-event VID:PID +
    phys in the log makes this testable.
-3. Wireless-specific: is the loss correlated with the RF link (dongle)
-   rather than the button matrix? Does it reproduce wired?
+3. ~~Wireless-specific: is the loss correlated with the RF link (dongle)
+   rather than the button matrix? Does it reproduce wired?~~
+   **Answered (owner report, 2026-06-12): reproduces on both wired and
+   dongle connections — the RF link is ruled out as the cause. Current
+   captures run wired-direct, the cleanest possible signal path: a
+   missing release at Layer B implicates firmware unambiguously.**
 4. Which of the four HID interfaces (`input0/3/4/5` on the Elite Wireless
    SE, `1b1c:2b22`) carries side-button traffic in each profile mode, and
    does the failure follow the interface or the physical button?
