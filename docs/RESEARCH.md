@@ -82,10 +82,15 @@ But the machinery for the fix is mature:
   deferred-work timer. Both are declared in the kernel's
   `hid_bpf_helpers.h` (vendored in `bpf/`).
 
+> **2026-06-12: root cause confirmed — see [FINDINGS.md](FINDINGS.md).**
+> Two live captures show the firmware's side-button endpoint freezing
+> mid-keypress: the press report is the last transmission on that
+> endpoint while the pointer endpoint stays alive until replug.
+
 ## Open questions this tool should answer
 
-1. Does the release report ever reach the host (Layer B) when a ghost
-   press occurs (Layer A)?
+1. ~~Does the release report ever reach the host (Layer B) when a ghost
+   press occurs (Layer A)?~~ **Answered: no — see FINDINGS.md.**
 2. Is the trigger correlated with simultaneous keyboard + side-button
    activity (cross-device, possibly same keycode)? Per-event VID:PID +
    phys in the log makes this testable.
