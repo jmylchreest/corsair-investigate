@@ -3,6 +3,10 @@
 Two live captures on a Scimitar Elite Wireless SE (`1b1c:2b22`, wired
 connection), both with full Layer A (evdev) + Layer B (raw HID) coverage.
 
+> **Full evidence corpus** (writeup + filtered Layer A/B data for both
+> captures):
+> https://gist.github.com/jmylchreest/8ab9e19099328cc76157599b34b36e06
+
 ## Capture 1 — marker 18:33:08, side button 3 (KEY_3)
 
 - Layer A: minutes of clean press/release pairs, then at marker−6.501s a
