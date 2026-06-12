@@ -20,7 +20,8 @@
 #define MAX_REPORT 64
 
 struct hid_rec {
-	__u64 ts_ns;
+	__u64 ts_ns; /* CLOCK_BOOTTIME ns — convertible to wall clock via
+		      * the log header's boot_ns_offset, same as Layer A */
 	__u32 report_type;
 	__u32 report_len; /* actual length, capped at MAX_REPORT */
 	__u8 report[MAX_REPORT];
@@ -61,7 +62,7 @@ int BPF_PROG(scimitar_hid_event, struct hid_bpf_ctx *hctx,
 		return 0;
 	}
 
-	rec->ts_ns = bpf_ktime_get_ns();
+	rec->ts_ns = bpf_ktime_get_boot_ns();
 	rec->report_type = type;
 
 	len = hctx->size;

@@ -33,6 +33,7 @@ install -m 0755 scripts/mark_symptom.sh  /usr/local/bin/scimitar-mark
 install -m 0755 scripts/query_window.sh  /usr/local/bin/scimitar-query
 install -m 0755 scripts/find_device.sh   /usr/local/bin/scimitar-find
 install -m 0755 scripts/decode_events.py /usr/local/bin/scimitar-decode
+install -m 0755 scripts/prune_logs.py    /usr/local/bin/scimitar-prune
 
 echo "==> Installing udev rules"
 install -m 0644 udev/99-scimitar-diag.rules /etc/udev/rules.d/
@@ -44,8 +45,11 @@ install -d /etc/scimitar-diag
 install -m 0644 systemd/scimitar-diag.env /etc/scimitar-diag/
 install -m 0644 systemd/scimitar-diag.service /etc/systemd/system/
 install -m 0644 systemd/scimitar-diag-hid@.service /etc/systemd/system/
+install -m 0644 systemd/scimitar-diag-prune.service /etc/systemd/system/
+install -m 0644 systemd/scimitar-diag-prune.timer /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable --now scimitar-diag.service
+systemctl enable --now scimitar-diag-prune.timer
 
 echo
 echo "=========================================================="

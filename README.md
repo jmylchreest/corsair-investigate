@@ -149,6 +149,29 @@ timer. That quirk is upstreamable via
 [udev-hid-bpf](https://libevdev.pages.freedesktop.org/udev-hid-bpf/) →
 kernel `drivers/hid/bpf/progs/`.
 
+## Disk usage and pruning
+
+Measured rates during active use: Layer A ~0.2MB/h; Layer B ~3MB/h on the
+pointer interface (mouse-motion reports dominate), ~nothing on the others.
+Rotation hard-caps every log at 100MB + one `.1` generation.
+
+A daily timer (`scimitar-diag-prune.timer`, 04:00) shrinks this to almost
+nothing: it keeps only events within **±10 minutes of a marker** plus a
+**24-hour grace period** (data leading up to a symptom you haven't marked
+yet), and drops the rest. Headers and markers are never pruned. Tune via
+`PRUNE_WINDOW_MIN` / `PRUNE_GRACE_HOURS` in
+`/etc/scimitar-diag/scimitar-diag.env`, or run manually:
+
+```sh
+sudo scimitar-prune --restart-services --window-min 10 --grace-hours 24
+sudo scimitar-prune --dry-run ...        # preview only
+```
+
+(`--restart-services` briefly stops the capture daemons so the rewrite
+can't race their open file descriptors.) Net effect: steady-state disk
+usage is a few MB — one day of full-rate logs plus small slices around
+each marker.
+
 ## Uninstall
 
 ```sh

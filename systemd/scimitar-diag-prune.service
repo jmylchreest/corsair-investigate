@@ -1,0 +1,8 @@
+[Unit]
+Description=Prune scimitar-diag logs outside marker windows
+Documentation=https://github.com/jmylchreest/corsair-investigate
+
+[Service]
+Type=oneshot
+EnvironmentFile=-/etc/scimitar-diag/scimitar-diag.env
+ExecStart=/usr/local/bin/scimitar-prune --restart-services --window-min ${PRUNE_WINDOW_MIN} --grace-hours ${PRUNE_GRACE_HOURS}
