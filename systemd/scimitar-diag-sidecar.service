@@ -1,0 +1,22 @@
+[Unit]
+Description=Corsair Scimitar ghost-press detector + auto-reset sidecar
+Documentation=https://github.com/jmylchreest/corsair-investigate
+After=systemd-udevd.service scimitar-diag.service
+
+[Service]
+Type=simple
+# root: needs /dev/input/event* (read) and /dev/bus/usb (write, for reset)
+User=root
+EnvironmentFile=-/etc/scimitar-diag/scimitar-diag.env
+ExecStart=/usr/local/bin/scimitar-sidecar
+Restart=on-failure
+RestartSec=5
+
+ProtectSystem=strict
+ReadWritePaths=/var/log/scimitar-diag
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

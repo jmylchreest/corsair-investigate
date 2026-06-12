@@ -149,6 +149,50 @@ timer. That quirk is upstreamable via
 [udev-hid-bpf](https://libevdev.pages.freedesktop.org/udev-hid-bpf/) →
 kernel `drivers/hid/bpf/progs/`.
 
+## Automatic detection + recovery (sidecar)
+
+`scimitar-diag-sidecar.service` watches the mouse's evdev nodes and detects
+the ghost signature live: a side-button PRESS outstanding longer than
+`SIDECAR_THRESHOLD_MS` (default 1500ms) with no RELEASE. On every detection
+it **auto-stamps a labelled marker** — no manual hotkey needed — recording
+which button and how long it was stuck, e.g.:
+
+```
+AUTO ghost KEY_MINUS (code 12) on event28 held 1600ms no release; reset OK (USBDEVFS_RESET on /dev/bus/usb/003/067)
+```
+
+Because every detection is a marker, the always-on capture keeps a labelled
+window automatically, and you can ask whether one button dominates:
+
+```sh
+scimitar-sidecar --stats        # tally of auto-detections by button
+#   12  KEY_MINUS  (100%)
+```
+
+### Recovery (opt-in)
+
+Default is **observe mode** (`SIDECAR_RESET=0`): detect and log only. Once
+you've confirmed the pattern and that the threshold doesn't false-fire on
+legitimate long holds, arm recovery with `SIDECAR_RESET=1` in
+`/etc/scimitar-diag/scimitar-diag.env`. Methods, weakest first:
+
+| `SIDECAR_RESET_METHOD` | What | Interruption |
+|---|---|---|
+| `bus-reset` (default) | `USBDEVFS_RESET` — USB bus reset, device stays powered | **~0.5s, measured** |
+| `reauthorize` | de-configure + re-configure via sysfs `authorized` | ~1s |
+| `rebind` | unbind/rebind from the `usb` driver | ~1s |
+
+> **Caveat:** a bus reset re-initialises the USB link but does **not** cut
+> power, so it is not identical to the unplug/replug that is known to fix
+> the bug. Whether it clears the firmware freeze can only be confirmed when
+> the bug next occurs with recovery armed — the auto-marker records the
+> outcome. If it proves insufficient, escalate to `reauthorize`/`rebind`; a
+> true VBUS power cycle needs external port-power control (`uhubctl`, only
+> on hubs with per-port power switching).
+
+Measured: `bus-reset` blocks ~507ms and the device returns fully with all
+event nodes intact — far less disruptive than a physical replug.
+
 ## Disk usage and pruning
 
 Measured rates during active use: Layer A ~0.2MB/h; Layer B ~3MB/h on the

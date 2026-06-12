@@ -4,3 +4,4 @@ bpf/*.bpf.o
 src/*.skel.h
 *.log
 .aide/
+firmware-local/

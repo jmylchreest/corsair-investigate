@@ -5,12 +5,14 @@ set -euo pipefail
 [[ $EUID -eq 0 ]] || { echo "ERROR: run as root (sudo ./uninstall.sh)" >&2; exit 1; }
 
 systemctl disable --now scimitar-diag.service 2>/dev/null || true
+systemctl disable --now scimitar-diag-sidecar.service 2>/dev/null || true
 systemctl disable --now scimitar-diag-prune.timer 2>/dev/null || true
 systemctl stop 'scimitar-diag-hid@*.service' 2>/dev/null || true
 rm -f /etc/systemd/system/scimitar-diag.service \
       /etc/systemd/system/scimitar-diag-hid@.service \
       /etc/systemd/system/scimitar-diag-prune.service \
-      /etc/systemd/system/scimitar-diag-prune.timer
+      /etc/systemd/system/scimitar-diag-prune.timer \
+      /etc/systemd/system/scimitar-diag-sidecar.service
 systemctl daemon-reload
 
 rm -f /etc/udev/rules.d/99-scimitar-diag.rules
@@ -19,7 +21,7 @@ udevadm control --reload
 rm -f /usr/local/bin/scimitar_log /usr/local/bin/scimitar_hid \
       /usr/local/bin/scimitar-mark /usr/local/bin/scimitar-query \
       /usr/local/bin/scimitar-find /usr/local/bin/scimitar-decode \
-      /usr/local/bin/scimitar-prune
+      /usr/local/bin/scimitar-prune /usr/local/bin/scimitar-sidecar
 rm -rf /etc/scimitar-diag
 
 userdel scimitar-diag 2>/dev/null || true

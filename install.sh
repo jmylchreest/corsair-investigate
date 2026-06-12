@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 
 echo "==> Checking build dependencies (pacman)"
 if [[ -f /etc/arch-release ]] || grep -qiE 'arch|cachyos' /etc/os-release; then
-    pacman -S --needed --noconfirm clang llvm libbpf gcc make pkgconf python || true
+    pacman -S --needed --noconfirm clang llvm libbpf gcc make pkgconf python python-evdev || true
     # bpftool: 'bpf' on CachyOS/Arch kernels' tooling repo, 'bpftool' on vanilla Arch
     command -v bpftool >/dev/null || pacman -S --needed --noconfirm bpf 2>/dev/null \
         || pacman -S --needed --noconfirm bpftool
@@ -34,6 +34,7 @@ install -m 0755 scripts/query_window.sh  /usr/local/bin/scimitar-query
 install -m 0755 scripts/find_device.sh   /usr/local/bin/scimitar-find
 install -m 0755 scripts/decode_events.py /usr/local/bin/scimitar-decode
 install -m 0755 scripts/prune_logs.py    /usr/local/bin/scimitar-prune
+install -m 0755 scripts/scimitar_sidecar.py /usr/local/bin/scimitar-sidecar
 
 echo "==> Installing udev rules"
 install -m 0644 udev/99-scimitar-diag.rules /etc/udev/rules.d/
@@ -47,9 +48,11 @@ install -m 0644 systemd/scimitar-diag.service /etc/systemd/system/
 install -m 0644 systemd/scimitar-diag-hid@.service /etc/systemd/system/
 install -m 0644 systemd/scimitar-diag-prune.service /etc/systemd/system/
 install -m 0644 systemd/scimitar-diag-prune.timer /etc/systemd/system/
+install -m 0644 systemd/scimitar-diag-sidecar.service /etc/systemd/system/
 systemctl daemon-reload
 systemctl enable --now scimitar-diag.service
 systemctl enable --now scimitar-diag-prune.timer
+systemctl enable --now scimitar-diag-sidecar.service
 
 echo
 echo "=========================================================="
