@@ -120,18 +120,22 @@ mouse-button ghosts and keyboard ghosts separately).
 
 ## Layer B: raw HID capture
 
-When you want wire-level proof, attach the raw report logger to the mouse's
-hidraw node(s):
+A `scimitar-diag-hid@hidrawN` instance is **auto-started by udev for every
+Corsair hidraw node** the moment it appears, and stops when it vanishes.
+hidraw numbers change on every replug — and replugging is exactly what you
+do when the bug strikes — so udev ownership is what keeps wire-level
+coverage across the failure/recovery cycle.
 
 ```sh
-scimitar-find                              # lists Corsair nodes
-sudo systemctl start scimitar-diag-hid@hidraw2
+scimitar-find                                  # map nodes to interfaces
+systemctl list-units 'scimitar-diag-hid@*'     # running captures
 ```
 
-Output (`/var/log/scimitar-diag/hid_reports.hidraw2.log`) is hex-encoded,
-one report per line. The Scimitar Elite Wireless SE exposes four HID
-interfaces; if in doubt attach an instance to each and see which one carries
-button traffic.
+Output (`/var/log/scimitar-diag/hid_reports.hidrawN.log`) is hex-encoded,
+one report per line. On the Elite Wireless SE, pointer traffic uses 15-byte
+reports on the `input0` interface, while **side buttons arrive as keyboard
+bitmap reports on the `input3` interface** (hardware-remap mode) — both are
+captured.
 
 ## Next steps
 

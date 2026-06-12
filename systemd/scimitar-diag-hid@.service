@@ -1,7 +1,10 @@
 [Unit]
 Description=Corsair Scimitar raw HID report capture (Layer B) on /dev/%i
 Documentation=https://github.com/jmylchreest/corsair-investigate
-After=systemd-udevd.service
+# Instances are started by udev (SYSTEMD_WANTS) when a Corsair hidraw
+# node appears, and stop automatically when it vanishes on unplug.
+BindsTo=dev-%i.device
+After=dev-%i.device
 
 [Service]
 Type=simple

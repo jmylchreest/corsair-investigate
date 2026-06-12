@@ -3,3 +3,9 @@ SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1b1c", GROUP="input", MODE="0660"
 
 # Tag all Corsair input event nodes
 SUBSYSTEM=="input", ATTRS{idVendor}=="1b1c", TAG+="scimitar-diag"
+
+# Auto-start a Layer B raw-report capture for every Corsair hidraw node.
+# hidraw numbering changes on every replug — and replugging is exactly
+# what users do when the bug strikes — so udev (re)starting the capture
+# per-node is the only way to keep wire-level coverage across the event.
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1b1c", TAG+="systemd", ENV{SYSTEMD_WANTS}+="scimitar-diag-hid@%k.service"
