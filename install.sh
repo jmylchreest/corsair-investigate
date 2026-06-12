@@ -20,7 +20,9 @@ sudo -u "${SUDO_USER:-root}" make all || make all
 
 echo "==> Creating log directory and system user"
 id -u scimitar-diag &>/dev/null || useradd --system --no-create-home --shell /usr/bin/nologin scimitar-diag
-install -d -m 0770 -o root -g scimitar-diag /var/log/scimitar-diag
+# 0771: group gets full access, everyone else may traverse (not list) so
+# unprivileged users can append to the world-writable markers.log
+install -d -m 0771 -o root -g scimitar-diag /var/log/scimitar-diag
 touch /var/log/scimitar-diag/markers.log
 chmod 0666 /var/log/scimitar-diag/markers.log
 
