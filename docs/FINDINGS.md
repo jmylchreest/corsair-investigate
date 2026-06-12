@@ -47,6 +47,25 @@ Matrix-scan timing notes: both failures occurred during rapid button
 mashing (~5–10 presses/sec), suggesting a race in the firmware's
 matrix-scan/report queue under load.
 
+## Capture 3 — side button KEY_4 (auto-detected, 2026-06-12 21:33)
+
+First freeze caught by the sidecar rather than a manual marker. KEY_4 (code
+5) pressed, no release; sidecar flagged it at the 3s threshold; the watcher
+confirmed the device was replugged while the key was still held (~15s
+stuck, consistent with captures 1–2). Sidecar was in observe mode so no
+reset was attempted.
+
+Across the three captures the stuck button was **KEY_3, KEY_MINUS, KEY_4** —
+a different side button each time, confirming the freeze is a property of
+the whole side-button grid/path, not one defective switch.
+
+**Detector-tuning lesson:** an early threshold-only sidecar (any key held
+>1.5s) produced 194 false positives in ~2h, 98% of them `BTN_RIGHT` — i.e.
+ordinary right-click-and-hold. Restricting to the side-button keycodes
+(2–13, the keyboard interface) and raising the threshold to 3s eliminated
+them. A stuck-key detector must scope to the affected interface; raw "key
+held too long" is dominated by legitimate mouse-button holds.
+
 ## Firmware-side root cause
 
 Static RE of the firmware image (`docs/FIRMWARE_RE.md`) narrowed the freeze
