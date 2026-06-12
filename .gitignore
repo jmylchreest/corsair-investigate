@@ -5,3 +5,4 @@ src/*.skel.h
 *.log
 .aide/
 firmware-local/
+__pycache__/

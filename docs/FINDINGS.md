@@ -47,6 +47,24 @@ Matrix-scan timing notes: both failures occurred during rapid button
 mashing (~5–10 presses/sec), suggesting a race in the firmware's
 matrix-scan/report queue under load.
 
+## Firmware-side root cause
+
+Static RE of the firmware image (`docs/FIRMWARE_RE.md`) narrowed the freeze
+to a single producer/consumer hand-off on the keyboard-report path getting
+permanently stuck "busy/full" while the independent mouse path runs on.
+Two ranked hypotheses, both consistent with every observed symptom:
+**H1** — an `assert(button < BUTTON_COUNT)` in `keyMapStateIndexToStdReport`
+trips under a rapid press/release race and suspends only the keyboard task;
+**H2** — `taskNotifyOnNotifySend`'s "report-in-flight" flag is left set on
+an error path, blocking all future keyboard sends. Definitive confirmation
+needs the ROM/bootloader (the FreeRTOS kernel + USB driver live below
+0x40000, outside the downloadable app image) or live SWD tracing.
+
+**New actionable lead:** the trigger is rapid input (~5–10/s). Rate-limiting
+or coalescing side-button keyboard reports to stay below the race threshold
+may *prevent* the freeze, not just recover from it — a strong candidate for
+the HID-BPF quirk to do in addition to release synthesis.
+
 ## Implications for the fix phase
 
 1. **Synthesising the missing release works and is worth doing.** A
