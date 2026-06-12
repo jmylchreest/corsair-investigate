@@ -1,0 +1,21 @@
+[Unit]
+Description=Corsair Scimitar raw HID report capture (Layer B) on /dev/%i
+Documentation=https://github.com/jmylchreest/corsair-investigate
+After=systemd-udevd.service
+
+[Service]
+Type=simple
+User=root
+EnvironmentFile=-/etc/scimitar-diag/scimitar-diag.env
+ExecStart=/usr/local/bin/scimitar_hid -d /dev/%i -o ${HID_LOG_DIR}/hid_reports.%i.log --rotate-mb ${ROTATE_MB}
+Restart=on-failure
+RestartSec=5
+
+ProtectSystem=strict
+ReadWritePaths=/var/log/scimitar-diag
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

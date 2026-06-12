@@ -1,0 +1,27 @@
+[Unit]
+Description=Corsair Scimitar Ghost-Press Diagnostic Logger (Layer A)
+Documentation=https://github.com/jmylchreest/corsair-investigate
+After=systemd-udevd.service
+
+[Service]
+Type=simple
+# root is the simple default for kprobe attachment. To drop root instead:
+#   User=scimitar-diag
+#   AmbientCapabilities=CAP_BPF CAP_PERFMON CAP_SYS_ADMIN
+#   CapabilityBoundingSet=CAP_BPF CAP_PERFMON CAP_SYS_ADMIN
+# (CAP_SYS_ADMIN is still required for kprobe-based programs.)
+User=root
+EnvironmentFile=-/etc/scimitar-diag/scimitar-diag.env
+ExecStart=/usr/local/bin/scimitar_log -o ${EVENTS_LOG} --rotate-mb ${ROTATE_MB}
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+ProtectSystem=strict
+ReadWritePaths=/var/log/scimitar-diag
+PrivateTmp=true
+NoNewPrivileges=true
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

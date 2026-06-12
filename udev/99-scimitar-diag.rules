@@ -1,0 +1,5 @@
+# Grant input group access to Corsair HID devices (hidraw nodes)
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="1b1c", GROUP="input", MODE="0660"
+
+# Tag all Corsair input event nodes
+SUBSYSTEM=="input", ATTRS{idVendor}=="1b1c", TAG+="scimitar-diag"

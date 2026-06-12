@@ -1,0 +1,6 @@
+bin/
+bpf/vmlinux.h
+bpf/*.bpf.o
+src/*.skel.h
+*.log
+.aide/
